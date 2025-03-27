@@ -14,7 +14,7 @@ function Products() {
     const [addedProducts, setaddedProducts] = useState([])
     // console.log(addedProducts)
     //*FunzioneupdateProductQuantity
-    function updateProductQuantity(p) {
+    function updateProductQuantity(p, e) {
         const find = addedProducts.find(el => {
             return el.name === p.name
         })
@@ -24,12 +24,12 @@ function Products() {
         setaddedProducts(prev =>
             find ?
                 prev.map(item => {
-                    console.log("prev", prev)
-                    console.log(addedProducts)
-                    console.log("item", item)
+                    // console.log("prev", prev)
+                    // console.log(addedProducts)
+                    // console.log("item", item)
                     if (item.name === find.name) {
                         return {
-                            ...item, quantity: item.quantity + 1
+                            ...item, quantity: e ? parseInt(e.target.value) : item.quantity + 1
                         }
                     }
                     return item
@@ -77,6 +77,7 @@ function Products() {
 
     }
 
+    //* TOTALE DA PAGARE 
     let total = addedProducts.reduce((acc, curr) => {
         return acc += curr.price * curr.quantity
 
@@ -84,15 +85,15 @@ function Products() {
     }, 0)
     return (
         <>
-            <div className='bg-stone-200 my-10 flex flex-col justify-center items-center border border-amber-950 w-fit m-auto rounded-xl'> {products.map((el, index) =>
+            <div className='bg-stone-200 my-10 flex flex-col justify-center items-center border border-amber-950 w-fit m-auto rounded-xl'> {products.map((p, index) =>
                 <section key={index} className='flex bg-stone-900 gap-2 text-white pl-2 mt-0.5 rounded-3xl items-center w-72 m-2 justify-center'  >
                     <div className='flex gap-1'  >
-                        <p>{el.name}:</p>
-                        <p>{el.price}€</p>
+                        <p>{p.name}:</p>
+                        <p>{p.price}€</p>
 
                     </div>
                     <div >
-                        < button className='text-[8px] border border-amber-800 rounded-2xl p-2 m-2 cursor-pointer hover:bg-green-500 hover:text-stone-900' onClick={() => addToCart(el)} > Aggiungi al carrello</button >
+                        < button className='text-[8px] border border-amber-800 rounded-2xl p-2 m-2 cursor-pointer hover:bg-green-500 hover:text-stone-900' onClick={() => addToCart(p)} > Aggiungi al carrello</button >
 
                     </div>
 
@@ -104,12 +105,16 @@ function Products() {
             '>
                 <h3>Carrello:</h3>
                 {/* {console.log(addedProducts)} */}
-                {addedProducts.map((el, index) => {
+                {addedProducts.map((p, index) => {
                     return (
                         <div key={index}>
-                            <p>{el.name} : {el.price}€
-                                X ({el.quantity})</p>
-                            < button className='text-[8px] border border-amber-800 rounded-2xl p-1 m-0.5 cursor-pointer hover:bg-red-500 hover:text-stone-900' onClick={() => removeFromCard(el)}  > Remove</button >
+                            <p> <span>
+                                {p.name} : {p.price}€
+                            </span>
+                                <span>
+                                    <input type="number" className='bg-amber-100 rounded-2xl w-28 pl-4' placeholder='Quantita' min={1} value={p.quantity} onChange={(e) => updateProductQuantity(p, e)} />
+                                </span> X </p>
+                            < button className='text-[8px] border border-amber-800 rounded-2xl p-1 m-0.5 cursor-pointer hover:bg-red-500 hover:text-stone-900' onClick={() => removeFromCard(p)}  > Remove</button >
                         </div>
 
                     )
