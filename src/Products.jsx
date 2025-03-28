@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useReducer, useState } from 'react';
 import React from 'react'
 
 
 function Products() {
-
+    const [addedProducts, dispatcher] = useReducer(cartReducer, [])
     //!Array Products
     const products = [
         { name: 'Mela', price: 0.5 },
@@ -11,77 +11,71 @@ function Products() {
         { name: 'Latte', price: 1.0 },
         { name: 'Pasta', price: 0.7 },
     ];
-    const [addedProducts, setaddedProducts] = useState([])
-    // console.log(addedProducts)
-    //*FunzioneupdateProductQuantity
-    function updateProductQuantity(p, e) {
-        const find = addedProducts.find(el => {
-            return el.name === p.name
-        })
-        console.log("find", find)
-        // console.log(find.quantity)
 
-        setaddedProducts(prev =>
-            find ?
-                prev.map(item => {
-                    // console.log("prev", prev)
-                    // console.log(addedProducts)
-                    // console.log("item", item)
-                    if (item.name === find.name) {
-                        return {
-                            ...item, quantity: e ? parseInt(e.target.value) : item.quantity + 1
-                        }
-                    }
-                    return item
+    function cartReducer(addedProducts, action) {
 
-                })
-                : addedProducts)
+        switch (action.type) {
+            case 'ADD_ITEM':
 
-    }
-    //*FunzioneAddtoCard
-    const addToCart = (p) => {
-        // console.log("p : ", p)
-        const controllo = addedProducts.some(el => el.name === p.name)
-        // console.log("controlo:", controllo)
-        // console.log(controllo)
-        if (controllo) {
-            return updateProductQuantity(p)
+
+                const addedProduct = addedProducts.find(el => el.name === action.payload.name)
+
+                if (addedProduct) {
+                    action.payload.quantity = addedProduct.quantity + 1
+                }
+                else {
+                    return [...addedProducts, {
+                        ...action.payload,
+                        quantity: 1
+                    }]
+                }
+
+
+
+
+            case 'UPDATE_QUANTITY':
+                if (action.payload.quantity < 1 || isNaN(action.payload.quantity)) {
+                    return addedProducts
+                }
+                return addedProducts.map(p =>
+                    p.name === action.payload.name ? { ...p, quantity: action.payload.quantity } : p
+                );
+
+
+            case "REMOVE_ITEM":
+                return addedProducts.filter(p => p.name !== action.payload)
+
+
+            default: return addedProducts;
         }
-        setaddedProducts(cur => [...cur, { ...p, quantity: 1 }])
-        // console.log("dopo i laggiornamento", addedProducts)
     }
 
-    //*removeFromCard
-    function removeFromCard(p) {
 
-        // console.log(p)
-        console.log(addedProducts)
-        const find = addedProducts.find((item) => {
-            // console.log(item.name);
-            return item.name === p.name
 
-        })
 
-        setaddedProducts(curr => {
 
-            if (find) {
 
-                const arrayFiltrato = curr.filter(elemento => elemento.name != find.name)
-                return arrayFiltrato
-            }
 
-            else {
-                return addedProducts
-            }
-        })
 
-    }
+
+
+
+
+
+
+
+
+
+
+
+
 
     //* TOTALE DA PAGARE 
+
+
+
     let total = addedProducts.reduce((acc, curr) => {
         return acc += curr.price * curr.quantity
-
-
     }, 0)
     return (
         <>
@@ -93,7 +87,7 @@ function Products() {
 
                     </div>
                     <div >
-                        < button className='text-[8px] border border-amber-800 rounded-2xl p-2 m-2 cursor-pointer hover:bg-green-500 hover:text-stone-900' onClick={() => addToCart(p)} > Aggiungi al carrello</button >
+                        < button className='text-[8px] border border-amber-800 rounded-2xl p-2 m-2 cursor-pointer hover:bg-green-500 hover:text-stone-900' onClick={() => dispatcher({ type: "ADD_ITEM", payload: p })} > Aggiungi al carrello</button >
 
                     </div>
 
@@ -112,9 +106,12 @@ function Products() {
                                 {p.name} : {p.price}€
                             </span>
                                 <span>
-                                    <input type="number" className='bg-amber-100 rounded-2xl w-28 pl-4' placeholder='Quantita' min={1} value={p.quantity} onChange={(e) => updateProductQuantity(p, e)} />
+                                    <input type="number" className='bg-amber-100 rounded-2xl w-28 pl-4' placeholder='Quantita' min={1} value={p.quantity} onChange={(e) => dispatcher({ type: "UPDATE_QUANTITY", payload: { name: p.name, quantity: parseInt(e.target.value) } })} />
+
+
+
                                 </span> X </p>
-                            < button className='text-[8px] border border-amber-800 rounded-2xl p-1 m-0.5 cursor-pointer hover:bg-red-500 hover:text-stone-900' onClick={() => removeFromCard(p)}  > Remove</button >
+                            < button className='text-[8px] border border-amber-800 rounded-2xl p-1 m-0.5 cursor-pointer hover:bg-red-500 hover:text-stone-900' onClick={() => dispatcher({ type: "REMOVE_ITEM", payload: p.name })}  > Remove</button >
                         </div>
 
                     )
